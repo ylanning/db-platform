@@ -3,7 +3,7 @@
 import logging
 
 from app.models.schemas import ProvisionRequest, ProvisionResponse
-from app.models.sqladmin import CloudPostgresqlAdminClient
+from app.services.sqladmin import CloudPostgresqlAdminClient
 from app.services.secrets import SecretManagerService
 
 logger = logging.getLogger(__name__)

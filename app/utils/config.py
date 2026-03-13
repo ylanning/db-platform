@@ -7,9 +7,9 @@ from pydantic_settings import BaseSettings, SettingConfigDict
 class DatabaseSettings(BaseSettings):
     project_id: str = field(None, description="GCP project ID for the database")
     region: str = "europe-west2"
-    instance_id: str = field(None, description="Cloud SQL instance ID")
-    backup_bucket: str = field(
-        None, description="GCS bucket name for storing database backups"
+    instance_id: str | None = field(None, description="Cloud SQL instance ID")
+    backup_bucket: str | None = field(
+        None, description="GCS bucket for storing database backups"
     )
     secret_prefix: str = field(
         "dbs", description="Prefix for secrets storing database credentials"

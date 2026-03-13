@@ -4,7 +4,7 @@ from googleapiclient.errors import HttpError
 from app.utils.config import get_database_settings
 
 
-class CloudPostgresqlAdmin:
+class CloudPostgresqlAdminClient:
     def __init__(self) -> None:
         settings = get_database_settings()
         if not settings.project_id or not settings.instance_id:

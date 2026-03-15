@@ -7,6 +7,7 @@ from app.models.schemas import (
     ProvisionResponse,
     StatusResponse,
     RotateCredentialsResponse,
+    RotateCredentialsRequest,
 )
 from app.services.sqladmin import CloudPostgresqlAdminClient
 from app.services.secrets import SecretManagerService
@@ -85,7 +86,7 @@ class ProvisionerService:
         )
 
     async def rotate_credentials(
-        self, req: ProvisionRequest
+        self, req: RotateCredentialsRequest
     ) -> RotateCredentialsResponse:
         """Rotate database credentials by generating a new password and updating the secret."""
         logger.info(f"Rotating credentials for {req.db_id}")

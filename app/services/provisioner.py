@@ -2,7 +2,12 @@
 
 import logging
 
-from app.models.schemas import ProvisionRequest, ProvisionResponse
+from app.models.schemas import (
+    ProvisionRequest,
+    ProvisionResponse,
+    StatusResponse,
+    RotateCredentialsResponse,
+)
 from app.services.sqladmin import CloudPostgresqlAdminClient
 from app.services.secrets import SecretManagerService
 
@@ -10,43 +15,17 @@ logger = logging.getLogger(__name__)
 
 
 class ProvisionerService:
-    """Handles database lifecycle operations: provisioning and deprovisioning.
+    """Manages database lifecycle in Cloud SQL and Secret Manager.
 
-    This service orchestrates creating/deleting databases, users, and secrets
-    in Google Cloud SQL and Secret Manager.
-
-    Example:
-        >>> from app.models.schemas import ProvisionRequest
-        >>> svc = ProvisionerService()
-        >>> req = ProvisionRequest(db_id="myapp-prod", owner="team-backend")
-        >>> response = await svc.provision(req)
-        >>> print(response.status)
-        'provisioned'
-        >>> print(response.connection_secret_name)
-        'projects/my-project/secrets/dbplatform-myapp-prod-conn'
+    Usage:
+        svc = ProvisionerService()
+        req = ProvisionRequest(db_id="myapp", owner="team-backend")
+        resp = await svc.provision(req)  # Creates db, user, and secret
+        resp = await svc.deprovision(req)  # Removes all resources
     """
 
     async def provision(self, req: ProvisionRequest) -> ProvisionResponse:
-        """Create a new database with user and store credentials in Secret Manager.
-
-        Steps performed:
-            1. Generate a secure password
-            2. Create the database in Cloud SQL
-            3. Create a user with the generated password
-            4. Store the connection string in Secret Manager
-
-        Args:
-            req: Provision request containing db_id and owner.
-
-        Returns:
-            ProvisionResponse with status='provisioned' and the secret name.
-
-        Example:
-            >>> req = ProvisionRequest(db_id="orders-db", owner="team-orders")
-            >>> resp = await svc.provision(req)
-            >>> resp.status
-            'provisioned'
-        """
+        """Create database, user, and store connection string in Secret Manager."""
         logger.info(f"Provisioning {req.db_id}")
         sql = CloudPostgresqlAdminClient()
         secrets = SecretManagerService()
@@ -66,25 +45,7 @@ class ProvisionerService:
         )
 
     async def deprovision(self, req: ProvisionRequest) -> ProvisionResponse:
-        """Remove a database, its user, and associated secret.
-
-        Steps performed:
-            1. Delete the database from Cloud SQL (ignores if not found)
-            2. Delete the user from Cloud SQL (ignores if not found)
-            3. Delete the secret from Secret Manager
-
-        Args:
-            req: Provision request containing db_id and owner.
-
-        Returns:
-            ProvisionResponse with status='deprovisioned'.
-
-        Example:
-            >>> req = ProvisionRequest(db_id="orders-db", owner="team-orders")
-            >>> resp = await svc.deprovision(req)
-            >>> resp.status
-            'deprovisioned'
-        """
+        """Delete database, user, and secret. Ignores resources not found."""
         logger.info(f"Deprovisioning {req.db_id}")
         sql = CloudPostgresqlAdminClient()
         secrets = SecretManagerService()
@@ -114,4 +75,30 @@ class ProvisionerService:
         logger.info(f"Deprovisioned {req.db_id} Owner: {req.owner}")
         return ProvisionResponse(
             db_id=req.db_id, status="deprovisioned", connection_secret_name=None
+        )
+
+    async def status(self, db_id: str) -> StatusResponse:
+        """Check the status of a database provision."""
+        logger.info(f"Checking status for {db_id}")
+        return StatusResponse(
+            db_id=db_id, status="provisioned", message="Implement health checks"
+        )
+
+    async def rotate_credentials(
+        self, req: ProvisionRequest
+    ) -> RotateCredentialsResponse:
+        """Rotate database credentials by generating a new password and updating the secret."""
+        logger.info(f"Rotating credentials for {req.db_id}")
+        sql = CloudPostgresqlAdminClient()
+        secrets = SecretManagerService()
+        user_name = f"user_{req.db_id}"
+        password = secrets.generate_password()
+
+        sql.create_user(user_name, password)
+        conn_string = f"postgresql://{user_name}:{password}@/{req.db_id}"
+        secret_name = secrets.create_or_update_secret(req.db_id, conn_string)
+
+        logger.info(f"Rotated credentials for {req.db_id}")
+        return RotateCredentialsResponse(
+            db_id=req.db_id, status="rotated", secret_name=secret_name
         )

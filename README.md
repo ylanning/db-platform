@@ -47,7 +47,7 @@ Use Terraform for long-lived, shared infrastructure (Cloud SQL instance, network
 Use the Python control plane for runtime tenant actions (create/drop databases, create/rotate users, on-demand backups).
 
 ## CI/CD: build + deploy
-The workflow `/Users/L1406238/Documents/New project/.github/workflows/build-and-deploy.yml` builds the Docker image, pushes to Artifact Registry, then runs Terraform apply.
+The workflow `/db-platform/.github/workflows/build-and-deploy.yml` builds the Docker image, pushes to Artifact Registry, then runs Terraform apply.
 Required GitHub secrets:
 - `GCP_PROJECT_ID`
 - `GCP_REGION` (e.g., `europe-west2`)

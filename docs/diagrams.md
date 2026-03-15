@@ -67,8 +67,8 @@ sequenceDiagram
   participant SM as Secret Manager
 
   Client->>API: POST /provision {db_id, owner}
-  API->>SQL: create database
-  API->>SQL: create user + password
+  API->>SQL: create database (timeout enforced)
+  API->>SQL: create user + password (timeout enforced)
   API->>SM: store connection string
   API-->>Client: 200 provisioned + secret name
 ```
@@ -82,11 +82,11 @@ sequenceDiagram
   participant SQL as Cloud SQL Admin API
 
   Scheduler->>API: POST /backup (OIDC)
-  API->>SQL: trigger backup
+  API->>SQL: trigger backup (timeout enforced)
   API-->>Scheduler: 200 started + backup_id
 
   Client->>API: POST /backup
-  API->>SQL: trigger backup
+  API->>SQL: trigger backup (timeout enforced)
   API-->>Client: 200 started + backup_id
 ```
 

@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     instance_id: str | None = None
     backup_bucket: str | None = None
     secret_prefix: str = "dbp"
-    timeout_seconds: int | None = None
+    request_timeout: int | None = None
 
 
 @lru_cache(maxsize=1)

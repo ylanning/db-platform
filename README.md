@@ -16,8 +16,8 @@ Set environment variables (prefix `DBP_`):
 - `DBP_INSTANCE_ID`
 - `DBP_BACKUP_BUCKET`
 - `DBP_SECRET_PREFIX` (default `dbp`)
+- `DBP_REQUEST_TIMEOUT` (default `30`)
 
-See `/Users/L1406238/Documents/New project/.env.example` for a template.
 
 ## Local run
 ```bash

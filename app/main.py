@@ -19,15 +19,15 @@ def create_app() -> FastAPI:
         logger.warning("upstream_error", path=str(request.url), error=str(exc))
         return JSONResponse(status_code=502, content={"detail": str(exc)})
 
-    @app.exception_handler(ConflictError)
-    async def conflict_handler(request: Request, exc: ConflictError) -> JSONResponse:
-        logger.info("conflict_error", path=str(request.url), error=str(exc))
-        return JSONResponse(status_code=409, content={"detail": str(exc)})
-
-    @app.exception_handler(NotFoundError)
-    async def not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:
-        logger.info("not_found_error", path=str(request.url), error=str(exc))
-        return JSONResponse(status_code=404, content={"detail": str(exc)})
+    @app.exception_handler(Exception)
+    async def unhandled_exception_handler(
+        request: Request, exc: Exception
+    ) -> JSONResponse:
+        logger.error("unhandled_exception", path=str(request.url), error=str(exc))
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal Server Error"},
+        )
 
     return app
 

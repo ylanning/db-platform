@@ -5,7 +5,8 @@
 flowchart LR
   subgraph "IaC (Terraform)"
     VPC["VPC + Subnet"]
-    SQL["Cloud SQL Postgres Instance"]
+    SQL["Cloud SQL Postgres Instance (HA Regional)"]
+    REPLICA["Read Replica (Optional)"]
     SA["Control Plane Service Account"]
     SM["Secret Manager"]
     GCS["GCS Backup Bucket"]
@@ -24,6 +25,7 @@ flowchart LR
   CR -->|Create/Update Secret| SM
   CR -->|Trigger Backup| SQL
   SQL -->|Automated Backups| GCS
+  SQL -->|Streaming Replication| REPLICA
 
   VPC --> SQL
   SA --> CR

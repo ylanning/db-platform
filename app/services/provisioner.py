@@ -12,6 +12,7 @@ from app.models.schemas import (
 from app.services.sqladmin import CloudPostgresqlAdminClient
 from app.services.secrets import SecretManagerService
 from app.services.errors import UpstreamError
+from app.utils.async_utils import run_with_timeout
 
 
 logger = logging.getLogger(__name__)
@@ -37,8 +38,8 @@ class ProvisionerService:
 
         password = secrets.generate_password()
         try:
-            sql.create_database(db_name)
-            sql.create_user(user_name, password)
+            await run_with_timeout(sql.create_database, db_name)
+            await run_with_timeout(sql.create_user, user_name, password)
         except Exception as exc:
             if sql.is_upstream_error(exc):
                 logger.error(f"Error provisioning {req.db_id}", exc_info=exc)
@@ -46,7 +47,9 @@ class ProvisionerService:
             raise
 
         conn_string = f"postgresql://{user_name}:{password}@/{db_name}"
-        secret_name = secrets.create_or_update_secret(req.db_id, conn_string)
+        secret_name = await run_with_timeout(
+            secrets.create_or_update_secret, req.db_id, conn_string
+        )
 
         logger.info(f"Provisioned {req.db_id} Owner: {req.owner} ")
         return ProvisionResponse(
@@ -62,26 +65,26 @@ class ProvisionerService:
         user_name = f"user_{req.db_id}"
 
         try:
-            sql.delete_database(db_name)
+            await run_with_timeout(sql.delete_database, db_name)
         except Exception as exc:
             if sql.is_upstream_error(exc):
                 raise UpstreamError("cloud sql error") from exc
             raise
 
         try:
-            sql.delete_user(user_name)
+            await run_with_timeout(sql.delete_user, user_name)
         except Exception as exc:
             if sql.is_upstream_error(exc):
                 logger.error(f"Error deleting user {user_name}", exc_info=exc)
-                raise
+                raise UpstreamError(f"Failed to delete user: {exc}") from exc
             raise
 
         try:
-            secrets.delete_secret(req.db_id)
+            await run_with_timeout(secrets.delete_secret, req.db_id)
         except Exception as exc:
-            if sql.is_upstream_error(exc):
-                logger.error(f"Error deleting secret {req.db_id}", exc_info=exc)
-            pass
+            logger.warning(
+                f"Error deleting secret {req.db_id}, continuing", exc_info=exc
+            )
 
         logger.info(f"Deprovisioned {req.db_id} Owner: {req.owner}")
         return ProvisionResponse(
@@ -106,15 +109,17 @@ class ProvisionerService:
         password = secrets.generate_password()
 
         try:
-            sql.create_user(user_name, password)
+            await run_with_timeout(sql.update_user_password, user_name, password)
         except Exception as exc:
             if sql.is_upstream_error(exc):
-                logger.error(f"Error creating user {user_name}", exc_info=exc)
-                raise UpstreamError(f"Error creating user {user_name}")
+                logger.error(f"Error updating password for {user_name}", exc_info=exc)
+                raise UpstreamError(f"Failed to rotate credentials: {exc}") from exc
             raise
 
         conn_string = f"postgresql://{user_name}:{password}@/{req.db_id}"
-        secret_name = secrets.create_or_update_secret(req.db_id, conn_string)
+        secret_name = await run_with_timeout(
+            secrets.create_or_update_secret, req.db_id, conn_string
+        )
 
         logger.info(f"Rotated credentials for {req.db_id}")
         return RotateCredentialsResponse(

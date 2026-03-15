@@ -55,6 +55,18 @@ class CloudPostgresqlAdminClient:
         )
         request.execute()
 
+    def update_user_password(self, user_name: str, password: str) -> None:
+        """Update a database user's password."""
+        body = {"name": user_name, "password": password}
+        request = self._service.users().update(
+            project=self.project_id,
+            instance=self.instance_id,
+            name=user_name,
+            host="%",
+            body=body,
+        )
+        request.execute()
+
     def create_backup(self, db_name: str) -> str:
         """Create an on-demand backup. Returns the backup ID."""
         request = (
@@ -81,6 +93,9 @@ class CloudPostgresqlAdminClient:
 
     def is_upstream_error(self, exc: Exception) -> bool:
         return self._status_code(exc) in {500, 502, 503}
+
+    def is_not_found(self, exc: Exception) -> bool:
+        return self._status_code(exc) == 404
 
     def _status_code(self, exc: Exception) -> int | None:
         if not isinstance(exc, HttpError):

@@ -1,15 +1,22 @@
+"""FastAPI application factory and configuration for DB Platform Control Plane."""
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 import structlog
 
 from app.api.routes import router
-from app.services.errors import ConflictError, NotFoundError, UpstreamError
+from app.services.errors import UpstreamError
 from app.utils.logging import configure_logging
 
 logger = structlog.get_logger()
 
 
 def create_app() -> FastAPI:
+    """Create and configure the FastAPI application.
+
+    Returns:
+        FastAPI: Configured application instance with routes and exception handlers.
+    """
     configure_logging()
     app = FastAPI(title="DB Platform Control Plane", version="0.1.0")
     app.include_router(router)

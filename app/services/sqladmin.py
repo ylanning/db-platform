@@ -79,26 +79,14 @@ class CloudPostgresqlAdminClient:
         response = request.execute()
         return response.get("status", "")
 
-    def is_not_found(self, exc: Exception) -> bool:
-        """Check if an exception is a 404 Not Found error."""
-        return isinstance(exc, HttpError) and exc.resp.status == 404
-
-    def is_conflict(self, exc: Exception) -> bool:
-        """Check if an exception is a 409 Conflict error."""
-        return isinstance(exc, HttpError) and exc.resp.status == 409
-
     def is_upstream_error(self, exc: Exception) -> bool:
-        """Check if an exception is an upstream error (500/502/503)."""
-        return isinstance(exc, HttpError) and exc.resp.status in (500, 502, 503)
+        return self._status_code(exc) in {500, 502, 503}
 
-    def is_bad_request(self, exc: Exception) -> bool:
-        """Check if an exception is a 400 Bad Request error."""
-        return isinstance(exc, HttpError) and exc.resp.status == 400
-
-    def is_unauthorized(self, exc: Exception) -> bool:
-        """Check if an exception is a 401/403 auth error."""
-        return isinstance(exc, HttpError) and exc.resp.status in (401, 403)
-
-    def is_rate_limited(self, exc: Exception) -> bool:
-        """Check if an exception is a 429 Too Many Requests error."""
-        return isinstance(exc, HttpError) and exc.resp.status == 429
+    def _status_code(self, exc: Exception) -> int | None:
+        if not isinstance(exc, HttpError):
+            return None
+        if hasattr(exc, "status_code"):
+            return exc.status_code
+        if hasattr(exc, "resp") and hasattr(exc.resp, "status"):
+            return int(exc.resp.status)
+        return None

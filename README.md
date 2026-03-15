@@ -17,6 +17,8 @@ Set environment variables (prefix `DBP_`):
 - `DBP_BACKUP_BUCKET`
 - `DBP_SECRET_PREFIX` (default `dbp`)
 
+See `/Users/L1406238/Documents/New project/.env.example` for a template.
+
 ## Local run
 ```bash
 poetry install
@@ -27,13 +29,15 @@ poetry run uvicorn app.main:app --reload
 ```bash
 cd infra
 terraform init
-terraform apply \
-  -var project_id=YOUR_PROJECT \
-  -var instance_id=YOUR_INSTANCE \
-  -var backup_bucket=YOUR_BUCKET \
-  -var backup_start_time=06:00 \
-  -var cloud_run_image=YOUR_IMAGE
+terraform apply -var-file=terraform.tfvars
 ```
+
+Copy `/db-platform/infra/terraform.tfvars.example` to `terraform.tfvars` and fill in your values.
+
+## GCP setup (project + billing)
+1. Create a new GCP project in the Cloud Console.
+2. Link the project to a billing account (required for Cloud SQL and Cloud Run).
+3. Enable required APIs (Terraform will enable Cloud Run, Scheduler, Artifact Registry).
 
 ## Local-time backup scheduling
 Terraform deploys the API to Cloud Run and creates a Cloud Scheduler job that calls `/backup` daily at 06:00 Europe/London time. The scheduler service account is granted `roles/run.invoker` on the Cloud Run service.
@@ -43,7 +47,7 @@ Use Terraform for long-lived, shared infrastructure (Cloud SQL instance, network
 Use the Python control plane for runtime tenant actions (create/drop databases, create/rotate users, on-demand backups).
 
 ## CI/CD: build + deploy
-The workflow `/db-platform/Documents/New project/.github/workflows/build-and-deploy.yml` builds the Docker image, pushes to Artifact Registry, then runs Terraform apply.
+The workflow `/Users/L1406238/Documents/New project/.github/workflows/build-and-deploy.yml` builds the Docker image, pushes to Artifact Registry, then runs Terraform apply.
 Required GitHub secrets:
 - `GCP_PROJECT_ID`
 - `GCP_REGION` (e.g., `europe-west2`)

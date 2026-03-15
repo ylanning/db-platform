@@ -11,6 +11,8 @@ from app.models.schemas import (
 )
 from app.services.sqladmin import CloudPostgresqlAdminClient
 from app.services.secrets import SecretManagerService
+from app.services.errors import UpstreamError
+
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +36,14 @@ class ProvisionerService:
         user_name = f"user_{req.db_id}"
 
         password = secrets.generate_password()
-        sql.create_database(db_name)
-        sql.create_user(user_name, password)
+        try:
+            sql.create_database(db_name)
+            sql.create_user(user_name, password)
+        except Exception as exc:
+            if sql.is_upstream_error(exc):
+                logger.error(f"Error provisioning {req.db_id}", exc_info=exc)
+                raise UpstreamError(f"Failed to provision database: {exc}")
+            raise
 
         conn_string = f"postgresql://{user_name}:{password}@/{db_name}"
         secret_name = secrets.create_or_update_secret(req.db_id, conn_string)
@@ -56,21 +64,23 @@ class ProvisionerService:
         try:
             sql.delete_database(db_name)
         except Exception as exc:
-            if not sql.is_not_found(exc):
-                logger.error(f"Error deleting database {db_name}", exc_info=exc)
-                raise
+            if sql.is_upstream_error(exc):
+                raise UpstreamError("cloud sql error") from exc
+            raise
 
         try:
             sql.delete_user(user_name)
         except Exception as exc:
-            if not sql.is_not_found(exc):
+            if sql.is_upstream_error(exc):
                 logger.error(f"Error deleting user {user_name}", exc_info=exc)
                 raise
+            raise
 
         try:
             secrets.delete_secret(req.db_id)
         except Exception as exc:
-            logger.error(f"Error deleting secret {req.db_id}", exc_info=exc)
+            if sql.is_upstream_error(exc):
+                logger.error(f"Error deleting secret {req.db_id}", exc_info=exc)
             pass
 
         logger.info(f"Deprovisioned {req.db_id} Owner: {req.owner}")
@@ -95,7 +105,14 @@ class ProvisionerService:
         user_name = f"user_{req.db_id}"
         password = secrets.generate_password()
 
-        sql.create_user(user_name, password)
+        try:
+            sql.create_user(user_name, password)
+        except Exception as exc:
+            if sql.is_upstream_error(exc):
+                logger.error(f"Error creating user {user_name}", exc_info=exc)
+                raise UpstreamError(f"Error creating user {user_name}")
+            raise
+
         conn_string = f"postgresql://{user_name}:{password}@/{req.db_id}"
         secret_name = secrets.create_or_update_secret(req.db_id, conn_string)
 

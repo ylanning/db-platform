@@ -119,19 +119,6 @@ sequenceDiagram
   API-->>Client: 200 rotated + secret name
 ```
 
-## Error: Provision Conflict
-```mermaid
-sequenceDiagram
-  participant Client
-  participant API as Control Plane API
-  participant SQL as Cloud SQL Admin API
-
-  Client->>API: POST /provision {db_id}
-  API->>SQL: create database
-  SQL-->>API: 409 Already Exists
-  API-->>Client: 409 Conflict (db_id already exists)
-```
-
 ## Error: Backup Upstream Failure
 ```mermaid
 sequenceDiagram

@@ -2,7 +2,7 @@
 name = "db-platform-control-plane"
 version = "0.1.0"
 description = "Mini DBaaS control plane for Cloud SQL Postgres"
-authors = ["yanti.lanning@gmail.com"]
+authors = "yanti.lanning@gmail.com"
 readme = "README.md"
 packages = [{ include = "app" }]
 

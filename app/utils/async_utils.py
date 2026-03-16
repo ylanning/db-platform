@@ -19,5 +19,5 @@ async def run_with_timeout(func: Callable[..., Any], *args: Any) -> Any:
     Raises:
         asyncio.TimeoutError: If execution exceeds the configured timeout.
     """
-    timeout = get_settings().request_timeout_seconds
+    timeout = get_settings().request_timeout
     return await asyncio.wait_for(asyncio.to_thread(func, *args), timeout=timeout)

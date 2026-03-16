@@ -3,7 +3,7 @@
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from app.utils.config import get_database_settings
+from app.utils.config import get_settings
 
 
 class CloudPostgresqlAdminClient:
@@ -18,7 +18,7 @@ class CloudPostgresqlAdminClient:
 
     def __init__(self) -> None:
         """Load project settings and create SQL Admin API client."""
-        settings = get_database_settings()
+        settings = get_settings()
         if not settings.project_id or not settings.instance_id:
             raise RuntimeError("Missing project_id or instance_id in database settings")
         self.project_id = settings.project_id

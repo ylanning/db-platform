@@ -3,7 +3,7 @@
 import secrets
 
 from google.cloud import secretmanager
-from app.utils.config import get_database_settings
+from app.utils.config import get_settings
 
 
 class SecretManagerService:
@@ -19,7 +19,7 @@ class SecretManagerService:
 
     def __init__(self) -> None:
         """Load project settings and create Secret Manager client."""
-        settings = get_database_settings()
+        settings = get_settings()
         if not settings.project_id:
             raise RuntimeError("Missing project_id in database settings")
         self.project_id = settings.project_id

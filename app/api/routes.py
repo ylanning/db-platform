@@ -10,7 +10,6 @@ from app.models.schemas import (
     RotateCredentialsRequest,
 )
 from app.services.backups import BackupService
-from app.services.sqladmin import CloudSqlAdminClient
 
 from app.services.provisioner import ProvisionerService
 
@@ -18,8 +17,13 @@ router = APIRouter()
 
 
 @router.get("/")
-async def health_check():
+async def root():
     return {"message": "OK"}
+
+
+@router.get("/health")
+async def health_check():
+    return {"status": "ok"}
 
 
 @router.post("/provision", response_model=ProvisionResponse)

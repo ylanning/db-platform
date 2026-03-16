@@ -4,12 +4,13 @@ Uses fake Cloud SQL and Secret Manager clients to verify provisioning
 logic without calling real GCP APIs.
 """
 
-import pytest
 from unittest.mock import patch
 
+import pytest
+
 from app.models.schemas import ProvisionRequest, RotateCredentialsRequest
-from app.services.provisioner import ProvisionerService
 from app.services.errors import UpstreamError
+from app.services.provisioner import ProvisionerService
 
 
 class FakeSqlClient:
@@ -83,9 +84,7 @@ def fake_secrets():
 @pytest.fixture
 def patch_services(fake_sql, fake_secrets):
     """Patch provisioner dependencies with fakes."""
-    with patch(
-        "app.services.provisioner.CloudPostgresqlAdminClient", return_value=fake_sql
-    ), patch(
+    with patch("app.services.provisioner.CloudPostgresqlAdminClient", return_value=fake_sql), patch(
         "app.services.provisioner.SecretManagerService", return_value=fake_secrets
     ):
         yield
@@ -103,9 +102,7 @@ def patch_timeout():
 
 
 @pytest.mark.asyncio
-async def test_provision_creates_db_and_user(
-    fake_sql, fake_secrets, patch_services, patch_timeout
-):
+async def test_provision_creates_db_and_user(fake_sql, fake_secrets, patch_services, patch_timeout):
     """Verify provision creates database, user, and stores connection secret."""
     svc = ProvisionerService()
     req = ProvisionRequest(db_id="mydb", owner="team-backend")
@@ -122,9 +119,7 @@ async def test_provision_creates_db_and_user(
 
 
 @pytest.mark.asyncio
-async def test_provision_upstream_error(
-    fake_sql, fake_secrets, patch_services, patch_timeout
-):
+async def test_provision_upstream_error(fake_sql, fake_secrets, patch_services, patch_timeout):
     """Verify provision raises UpstreamError when Cloud SQL fails."""
     fake_sql.should_fail = True
     fake_sql.fail_on = "create_database"
@@ -137,9 +132,7 @@ async def test_provision_upstream_error(
 
 
 @pytest.mark.asyncio
-async def test_deprovision_deletes_resources(
-    fake_sql, fake_secrets, patch_services, patch_timeout
-):
+async def test_deprovision_deletes_resources(fake_sql, fake_secrets, patch_services, patch_timeout):
     """Verify deprovision removes database, user, and secret."""
     fake_sql.databases.append("mydb")
     fake_sql.users["user_mydb"] = "old-password"

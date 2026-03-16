@@ -9,7 +9,7 @@ def configure_logging() -> None:
     """Configure standard logging and structlog with JSON output.
 
     Output example:
-        {"timestamp": "2026-03-15T14:30:22Z", "level": "info", "event": "Backup created", "db_id": "mydb", "backup_id": "abc123"}
+        {"timestamp": "2026-03-15T14:30:22Z", "level": "info", "event": "Backup created"}
     """
     logging.basicConfig(
         level=logging.INFO,

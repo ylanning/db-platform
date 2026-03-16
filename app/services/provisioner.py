@@ -5,15 +5,14 @@ import logging
 from app.models.schemas import (
     ProvisionRequest,
     ProvisionResponse,
-    StatusResponse,
-    RotateCredentialsResponse,
     RotateCredentialsRequest,
+    RotateCredentialsResponse,
+    StatusResponse,
 )
-from app.services.sqladmin import CloudPostgresqlAdminClient
-from app.services.secrets import SecretManagerService
 from app.services.errors import UpstreamError
+from app.services.secrets import SecretManagerService
+from app.services.sqladmin import CloudPostgresqlAdminClient
 from app.utils.async_utils import run_with_timeout
-
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +42,7 @@ class ProvisionerService:
         except Exception as exc:
             if sql.is_upstream_error(exc):
                 logger.error(f"Error provisioning {req.db_id}", exc_info=exc)
-                raise UpstreamError(f"Failed to provision database: {exc}")
+                raise UpstreamError(f"Failed to provision database: {exc}") from exc
             raise
 
         conn_string = f"postgresql://{user_name}:{password}@/{db_name}"
@@ -82,9 +81,7 @@ class ProvisionerService:
         try:
             await run_with_timeout(secrets.delete_secret, req.db_id)
         except Exception as exc:
-            logger.warning(
-                f"Error deleting secret {req.db_id}, continuing", exc_info=exc
-            )
+            logger.warning(f"Error deleting secret {req.db_id}, continuing", exc_info=exc)
 
         logger.info(f"Deprovisioned {req.db_id} Owner: {req.owner}")
         return ProvisionResponse(
@@ -94,13 +91,9 @@ class ProvisionerService:
     async def status(self, db_id: str) -> StatusResponse:
         """Check the status of a database provision."""
         logger.info(f"Checking status for {db_id}")
-        return StatusResponse(
-            db_id=db_id, status="provisioned", message="Implement health checks"
-        )
+        return StatusResponse(db_id=db_id, status="provisioned", message="Implement health checks")
 
-    async def rotate_credentials(
-        self, req: RotateCredentialsRequest
-    ) -> RotateCredentialsResponse:
+    async def rotate_credentials(self, req: RotateCredentialsRequest) -> RotateCredentialsResponse:
         """Rotate database credentials by generating a new password and updating the secret."""
         logger.info(f"Rotating credentials for {req.db_id}")
         sql = CloudPostgresqlAdminClient()
@@ -122,6 +115,4 @@ class ProvisionerService:
         )
 
         logger.info(f"Rotated credentials for {req.db_id}")
-        return RotateCredentialsResponse(
-            db_id=req.db_id, status="rotated", secret_name=secret_name
-        )
+        return RotateCredentialsResponse(db_id=req.db_id, status="rotated", secret_name=secret_name)

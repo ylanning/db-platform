@@ -1,8 +1,8 @@
 """FastAPI application factory and configuration for DB Platform Control Plane."""
 
+import structlog
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-import structlog
 
 from app.api.routes import router
 from app.services.errors import UpstreamError
@@ -27,9 +27,7 @@ def create_app() -> FastAPI:
         return JSONResponse(status_code=502, content={"detail": str(exc)})
 
     @app.exception_handler(Exception)
-    async def unhandled_exception_handler(
-        request: Request, exc: Exception
-    ) -> JSONResponse:
+    async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
         logger.error("unhandled_exception", path=str(request.url), error=str(exc))
         return JSONResponse(
             status_code=500,

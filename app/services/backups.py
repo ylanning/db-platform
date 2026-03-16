@@ -1,7 +1,6 @@
 """Service for creating PostgreSQL database backups in Cloud SQL."""
 
 import structlog
-import asyncio
 
 from app.models.schemas import BackupRequest, BackupResponse
 from app.services.sqladmin import CloudPostgresqlAdminClient

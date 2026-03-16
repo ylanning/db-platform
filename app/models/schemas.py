@@ -10,9 +10,7 @@ class ProvisionRequest(BaseModel):
 class ProvisionResponse(BaseModel):
     db_id: str = Field(..., description="Logical database id")
     status: str = Field(..., description="Provision status")
-    connection_secret_name: str | None = Field(
-        None, description="Connection secret name"
-    )
+    connection_secret_name: str | None = Field(None, description="Connection secret name")
 
 
 class StatusResponse(BaseModel):

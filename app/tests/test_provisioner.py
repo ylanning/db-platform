@@ -63,7 +63,7 @@ class FakeSecretManager:
 
     def create_or_update_secret(self, db_id: str, value: str) -> str:
         self.secrets[db_id] = value
-        return f"projects/test/secrets/dbp-{db_id}-conn"
+        return f"projects/test/secrets/dbp_{db_id}_conn"
 
     def delete_secret(self, db_id: str) -> None:
         if self.should_fail:

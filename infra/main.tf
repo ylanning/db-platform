@@ -65,24 +65,6 @@ resource "google_service_account" "control_plane" {
   display_name = "DBP Control Plane"
 }
 
-resource "google_project_iam_member" "sql_admin" {
-  project = var.project_id
-  role    = "roles/cloudsql.admin"
-  member  = "serviceAccount:${google_service_account.control_plane.email}"
-}
-
-resource "google_project_iam_member" "secret_manager" {
-  project = var.project_id
-  role    = "roles/secretmanager.admin"
-  member  = "serviceAccount:${google_service_account.control_plane.email}"
-}
-
-resource "google_project_iam_member" "storage_admin" {
-  project = var.project_id
-  role    = "roles/storage.admin"
-  member  = "serviceAccount:${google_service_account.control_plane.email}"
-}
-
 resource "google_artifact_registry_repository" "docker" {
   format        = "DOCKER"
   repository_id = var.artifact_repo
@@ -158,24 +140,6 @@ resource "google_cloud_scheduler_job" "daily_backup" {
 resource "google_service_account" "github_actions" {
   account_id   = "github-actions"
   display_name = "GitHub Actions"
-}
-
-resource "google_project_iam_member" "github_actions_run_admin" {
-  project = var.project_id
-  role    = "roles/run.admin"
-  member  = "serviceAccount:${google_service_account.github_actions.email}"
-}
-
-resource "google_project_iam_member" "github_actions_artifact_writer" {
-  project = var.project_id
-  role    = "roles/artifactregistry.writer"
-  member  = "serviceAccount:${google_service_account.github_actions.email}"
-}
-
-resource "google_project_iam_member" "github_actions_sa_user" {
-  project = var.project_id
-  role    = "roles/iam.serviceAccountUser"
-  member  = "serviceAccount:${google_service_account.github_actions.email}"
 }
 
 resource "google_iam_workload_identity_pool" "github" {

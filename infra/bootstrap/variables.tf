@@ -17,3 +17,8 @@ variable "github_actions_sa" {
   type        = string
   description = "GitHub Actions service account email"
 }
+
+variable "control_plane_sa" {
+  type        = string
+  description = "Control plane service account email"
+}

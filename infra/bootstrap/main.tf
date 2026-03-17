@@ -111,3 +111,22 @@ resource "google_project_iam_member" "gha_serviceusage_admin" {
   role    = "roles/serviceusage.serviceUsageAdmin"
   member  = "serviceAccount:${var.github_actions_sa}"
 }
+
+# Control plane service account IAM
+resource "google_project_iam_member" "control_plane_sql_admin" {
+  project = var.project_id
+  role    = "roles/cloudsql.admin"
+  member  = "serviceAccount:${var.control_plane_sa}"
+}
+
+resource "google_project_iam_member" "control_plane_secret_manager" {
+  project = var.project_id
+  role    = "roles/secretmanager.admin"
+  member  = "serviceAccount:${var.control_plane_sa}"
+}
+
+resource "google_project_iam_member" "control_plane_storage_admin" {
+  project = var.project_id
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${var.control_plane_sa}"
+}

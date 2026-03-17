@@ -141,6 +141,9 @@ celerybeat.pid
 env/
 venv/
 ENV/
+
+# Allow env tfvars files
+!infra/env/*.tfvars
 env.bak/
 venv.bak/
 

@@ -1,2 +1,2 @@
-bucket = "dbp-backups-data-platform-490117"
+bucket = "tfstate-data-platform-490117-2025"
 prefix = "terraform/state"

@@ -7,9 +7,9 @@ RUN pip install --no-cache-dir poetry==1.8.3
 COPY pyproject.toml README.md /app/
 
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi
+    && poetry install --no-interaction --no-ansi --no-root
 
-COPY app /db-platform/app
+COPY app /app/app
 
 EXPOSE 8000
 

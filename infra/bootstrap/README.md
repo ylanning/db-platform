@@ -9,7 +9,7 @@ terraform apply \
   -var project_id=YOUR_PROJECT_ID \
   -var region=europe-west2 \
   -var tf_state_bucket=tfstate-data-platform-490117-2025 \
-  -var github_actions_sa=github-actions@YOUR_PROJECT_ID.iam.gserviceaccount.com
+  -var github_actions_sa=github-actions@data-platform-490117.iam.gserviceaccount.com
 ```
 
 Then use the bucket in the main Terraform backend config:

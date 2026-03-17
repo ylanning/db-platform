@@ -15,7 +15,7 @@ output "scheduler_service_account_email" {
 }
 
 output "cloud_run_url" {
-  value = google_cloud_run_service.control_plane.status[0].url
+  value = var.cloud_run_url
 }
 
 output "artifact_repo" {

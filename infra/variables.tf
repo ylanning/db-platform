@@ -45,6 +45,12 @@ variable "cloud_run_service_name" {
   description = "Cloud Run service name"
 }
 
+variable "cloud_run_url" {
+  type        = string
+  default     = ""
+  description = "Full Cloud Run URL (e.g., https://...run.app). Required for scheduler job if service URL isn't available from the provider."
+}
+
 variable "secret_prefix" {
   type        = string
   default     = "dbp"

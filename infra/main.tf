@@ -143,7 +143,7 @@ resource "google_cloud_scheduler_job" "daily_backup" {
 
   http_target {
     http_method = "POST"
-    uri         = "${google_cloud_run_service.control_plane.status[0].url}/backup"
+    uri         = "${var.cloud_run_url}/backup"
 
     oidc_token {
       service_account_email = google_service_account.scheduler.email

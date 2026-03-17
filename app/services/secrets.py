@@ -10,7 +10,7 @@ from app.utils.config import get_settings
 class SecretManagerService:
     """Stores database connection strings in Google Cloud Secret Manager.
 
-    Secret naming: {secret_prefix}-{db_id}-conn
+    Secret naming: {secret_prefix}_{db_id}_conn
 
     Usage:
         svc = SecretManagerService()
@@ -29,7 +29,7 @@ class SecretManagerService:
 
     def _secret_id(self, db_id: str) -> str:
         """Build the secret ID from a database identifier."""
-        return f"{self.secret_prefix}-{db_id}-conn"
+        return f"{self.secret_prefix}_{db_id}_conn"
 
     def create_or_update_secret(self, db_id: str, value: str) -> str:
         """Store a connection string. Creates the secret if it doesn't exist."""

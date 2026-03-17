@@ -1,0 +1,6 @@
+project_id      = "data-platform-490117"
+region          = "europe-west2"
+instance_id     = "dbp-primary"
+backup_bucket   = "dbp-backups-data-platform-490117"
+cloud_run_image = "europe-west2-docker.pkg.dev/data-platform-490117/dbp-control-plane/dbp-control-plane:latest"
+github_repo     = "ylanning/db-platform"

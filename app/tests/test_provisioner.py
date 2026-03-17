@@ -111,7 +111,7 @@ async def test_provision_creates_db_and_user(fake_sql, fake_secrets, patch_servi
 
     assert resp.db_id == "mydb"
     assert resp.status == "provisioned"
-    assert resp.connection_secret_name == "projects/test/secrets/dbp-mydb-conn"
+    assert resp.connection_secret_name == "projects/test/secrets/dbp_mydb_conn"
     assert "mydb" in fake_sql.databases
     assert "user_mydb" in fake_sql.users
     assert fake_sql.users["user_mydb"] == "test-password-123"
@@ -189,7 +189,7 @@ async def test_rotate_credentials_updates_password(
     resp = await svc.rotate_credentials(req)
 
     assert resp.status == "rotated"
-    assert resp.secret_name == "projects/test/secrets/dbp-mydb-conn"
+    assert resp.secret_name == "projects/test/secrets/dbp_mydb_conn"
     assert fake_sql.users["user_mydb"] == "test-password-123"
     assert "mydb" in fake_secrets.secrets
 

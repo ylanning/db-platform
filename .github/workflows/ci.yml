@@ -10,6 +10,7 @@ env:
   REGION: europe-west2
   SERVICE_NAME: dbp-control-plane
   REPOSITORY: dbp-control-plane
+  TF_ENV: dev
 
 jobs:
   test:
@@ -40,7 +41,7 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          project_id: ${{secrets.GCP_PROJECT_ID}}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
@@ -48,7 +49,10 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform init
-        run: terraform -chdir=infra init
+        run: |
+          terraform -chdir=infra init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="prefix=${{ secrets.TF_STATE_PREFIX }}"
 
       - name: Terraform fmt
         run: terraform -chdir=infra fmt -check
@@ -59,9 +63,7 @@ jobs:
       - name: Terraform plan
         run: |
           terraform -chdir=infra plan \
-            -var project_id="${{ secrets.GCP_PROJECT_ID }}" \
-            -var instance_id="${{ secrets.CLOUDSQL_INSTANCE_ID }}" \
-            -var backup_bucket="${{ secrets.BACKUP_BUCKET }}" \
+            -var-file=env/${{ env.TF_ENV }}.tfvars \
             -var cloud_run_image="placeholder"
 
   deploy:
@@ -78,6 +80,7 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
@@ -86,6 +89,12 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        run: |
+          terraform -chdir=infra init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="prefix=${{ secrets.TF_STATE_PREFIX }}"
 
       - name: Terraform fmt
         run: terraform -chdir=infra fmt -check
@@ -105,9 +114,6 @@ jobs:
 
       - name: Terraform apply
         run: |
-          terraform -chdir=infra init
           terraform -chdir=infra apply -auto-approve \
-            -var project_id="${{ secrets.GCP_PROJECT_ID }}" \
-            -var instance_id="${{ secrets.CLOUDSQL_INSTANCE_ID }}" \
-            -var backup_bucket="${{ secrets.BACKUP_BUCKET }}" \
+            -var-file=env/${{ env.TF_ENV }}.tfvars \
             -var cloud_run_image="$IMAGE"

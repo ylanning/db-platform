@@ -87,3 +87,25 @@ terraform apply \
 | Backups/PITR | Higher | Higher | Manual restore | Lowest |
 
 Selection guidance: use HA for user-facing critical services, read replicas for cost-conscious resilience with manual failover, and backups/PITR for disaster recovery and data correction.
+
+## CI/CD secrets
+- `GCP_PROJECT_ID`
+- `WIF_PROVIDER`
+- `WIF_SERVICE_ACCOUNT`
+- `CLOUDSQL_INSTANCE_ID`
+- `BACKUP_BUCKET`
+- `TF_STATE_BUCKET`
+- `TF_STATE_PREFIX`
+
+## Environments
+This repo supports multiple environments via tfvars files:
+- `infra/env/dev.tfvars`
+- `infra/env/staging.tfvars`
+- `infra/env/prod.tfvars`
+
+Copy the `.example` files and fill in your values.
+The CI pipeline uses `TF_ENV` (default `dev`) to select the tfvars file.
+
+For state reuse across environments, set:
+- `TF_STATE_BUCKET` (shared bucket, e.g., `tf-state-data-platform`)
+- `TF_STATE_PREFIX` (e.g., `db-platform/dev`, `db-platform/staging`, `db-platform/prod`)

@@ -9,22 +9,22 @@ variable "project_number" {
 }
 
 variable "region" {
-  type = string
+  type    = string
   default = "europe-west2"
 }
 
 variable "instance_id" {
-  type = string
+  type        = string
   description = "Cloud SQL instance id"
 }
 
 variable "db_tier" {
-  type = string
+  type    = string
   default = "db-custom-1-3840"
 }
 
 variable "backup_bucket" {
-  type = string
+  type        = string
   description = "GCS bucket for backups"
 }
 

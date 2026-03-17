@@ -10,7 +10,7 @@ output "backup_bucket" {
   value = google_storage_bucket.backups.name
 }
 
-output "scheduler_service_account_email"{
+output "scheduler_service_account_email" {
   value = google_service_account.scheduler.name
 }
 

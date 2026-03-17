@@ -19,26 +19,26 @@ provider "google" {
 
 
 resource "google_sql_database_instance" "postgres" {
-  name = var.instance_id
+  name             = var.instance_id
   database_version = "POSTGRES_15"
-  region = var.region
+  region           = var.region
 
   settings {
-    tier = var.db_tier
+    tier              = var.db_tier
     availability_type = "REGIONAL"
     backup_configuration {
-      enabled = true
-      start_time = var.backup_start_time
+      enabled                        = true
+      start_time                     = var.backup_start_time
       point_in_time_recovery_enabled = true
     }
   }
 }
 
 resource "google_sql_database_instance" "replica" {
-  count = var.enable_replica ? 1 : 0
-  name = var.replica_instance_id
-  database_version = "POSTGRES_15"
-  region = var.region
+  count                = var.enable_replica ? 1 : 0
+  name                 = var.replica_instance_id
+  database_version     = "POSTGRES_15"
+  region               = var.region
   master_instance_name = google_sql_database_instance.postgres.name
 
   replica_configuration {
@@ -50,13 +50,13 @@ resource "google_sql_database_instance" "replica" {
 }
 
 resource "google_storage_bucket" "backups" {
-  location = var.region
-  name     = var.backup_bucket
+  location                    = var.region
+  name                        = var.backup_bucket
   uniform_bucket_level_access = true
 }
 
 resource "google_service_account" "control_plane" {
-  account_id = "dbp-control-plane"
+  account_id   = "dbp-control-plane"
   display_name = "DBP Control Plane"
 }
 
@@ -94,23 +94,23 @@ resource "google_cloud_run_service" "control_plane" {
       containers {
         image = var.cloud_run_image
         env {
-          name = "DBP_PROJECT_ID"
+          name  = "DBP_PROJECT_ID"
           value = var.project_id
         }
         env {
-          name = "DBP_REGION"
+          name  = "DBP_REGION"
           value = var.region
         }
         env {
-          name = "DBP_INSTANCE_ID"
+          name  = "DBP_INSTANCE_ID"
           value = var.instance_id
         }
         env {
-          name = "DBP_BACKUP_BUCKET"
+          name  = "DBP_BACKUP_BUCKET"
           value = var.backup_bucket
         }
         env {
-          name = "DBP_SECRET_PREFIX"
+          name  = "DBP_SECRET_PREFIX"
           value = var.secret_prefix
         }
       }

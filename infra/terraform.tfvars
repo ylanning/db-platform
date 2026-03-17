@@ -1,4 +1,5 @@
 project_id      = "data-platform-490117"
+project_number  = "926377652927"  # Run: gcloud projects describe data-platform-490117 --format="value(projectNumber)"
 region          = "europe-west2"
 instance_id     = "dbp-primary"
 backup_bucket   = "dbp-backups-data-platform-490117"

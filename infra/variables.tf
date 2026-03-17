@@ -3,6 +3,11 @@ variable "project_id" {
   description = "GCP project id"
 }
 
+variable "project_number" {
+  type        = string
+  description = "GCP project number (run: gcloud projects describe PROJECT_ID --format='value(projectNumber)')"
+}
+
 variable "region" {
   type = string
   default = "europe-west2"

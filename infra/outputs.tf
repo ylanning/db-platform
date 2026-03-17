@@ -28,7 +28,7 @@ output "replica_instance_id" {
 }
 
 output "wif_provider" {
-  value       = google_iam_workload_identity_pool_provider.github.name
+  value       = "projects/${var.project_number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.github.workload_identity_pool_id}/providers/${google_iam_workload_identity_pool_provider.github.workload_identity_pool_provider_id}"
   description = "Workload Identity Provider for GitHub Actions (use as WIF_PROVIDER secret)"
 }
 

@@ -58,6 +58,42 @@ flowchart LR
   SCH -->|POST /backup| CR
 ```
 
+## GitHub Actions CI/CD (Test + Plan + Deploy)
+```mermaid
+flowchart LR
+  subgraph "GitHub Actions"
+    PR["Pull Request event"] --> PLAN["terraform-plan job"]
+    PUSH["Push to main"] --> TEST["test job"]
+    TEST --> DEPLOY["deploy job"]
+  end
+
+  subgraph "terraform-plan job"
+    TFINIT["terraform init"]
+    TFFMT["terraform fmt -check"]
+    TFVAL["terraform validate"]
+    TFPLAN["terraform plan (placeholder image)"]
+  end
+
+  subgraph "deploy job"
+    AUTH["Auth to GCP (WIF)"]
+    DOCKER["Build + push image (sha tag)"]
+    APPLY["terraform apply (cloud_run_image=sha)"]
+  end
+
+  subgraph "GCP"
+    AR["Artifact Registry"]
+    CR["Cloud Run"]
+    SQL["Cloud SQL"]
+    SCH["Cloud Scheduler"]
+  end
+
+  PLAN --> TFINIT --> TFFMT --> TFVAL --> TFPLAN
+  DEPLOY --> AUTH --> DOCKER --> AR
+  DOCKER --> APPLY --> CR
+  APPLY --> SQL
+  APPLY --> SCH
+```
+
 ## Provisioning Flow
 ```mermaid
 sequenceDiagram
@@ -120,7 +156,7 @@ sequenceDiagram
 ```
 
 ## Error: Backup Upstream Failure
-```mermaid
+```mermai
 sequenceDiagram
   participant Client
   participant API as Control Plane API

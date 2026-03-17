@@ -12,35 +12,9 @@ terraform {
 }
 provider "google" {
   project = var.project_id
-  region = var.region
+  region  = var.region
 }
 
-resource "google_project_service" "run" {
-  service = "run.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "scheduler" {
-  service = "cloudscheduler.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "artifactregistry" {
-  service = "artifactregistry.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_compute_network" "vpc" {
-  name = "dbp-vpc"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "subnet" {
-  name    = "dbp-subnet"
-  region = var.region
-  ip_cidr_range = "10.10.0.0/24"
-  network = google_compute_network.vpc.id
-}
 
 resource "google_sql_database_instance" "postgres" {
   name = var.instance_id
@@ -105,9 +79,7 @@ resource "google_project_iam_member" "storage_admin" {
 resource "google_artifact_registry_repository" "docker" {
   format        = "DOCKER"
   repository_id = var.artifact_repo
-  location = var.region
-
-  depends_on = [google_project_service.artifactregistry]
+  location      = var.region
 }
 
 resource "google_cloud_run_service" "control_plane" {
@@ -142,7 +114,6 @@ resource "google_cloud_run_service" "control_plane" {
       }
     }
   }
-  depends_on = [google_project_service.run]
 }
 
 resource "google_cloud_run_service_iam_member" "scheduler_invoker" {
@@ -171,18 +142,11 @@ resource "google_cloud_scheduler_job" "daily_backup" {
       service_account_email = google_service_account.scheduler.email
     }
   }
-
-  depends_on = [google_project_service.scheduler]
 }
 
 # -----------------------------------------------------------------------------
 # GitHub Actions - Workload Identity Federation
 # -----------------------------------------------------------------------------
-
-resource "google_project_service" "iam_credentials" {
-  service            = "iamcredentials.googleapis.com"
-  disable_on_destroy = false
-}
 
 resource "google_service_account" "github_actions" {
   account_id   = "github-actions"
@@ -211,8 +175,6 @@ resource "google_iam_workload_identity_pool" "github" {
   workload_identity_pool_id = "github"
   display_name              = "GitHub Actions"
   description               = "Identity pool for GitHub Actions"
-
-  depends_on = [google_project_service.iam_credentials]
 }
 
 resource "google_iam_workload_identity_pool_provider" "github" {

@@ -1,6 +1,6 @@
-# Terraform bootstrap (state bucket + IAM)
+# Terraform bootstrap (state bucket + IAM + APIs)
 
-Run this once to create the Terraform state bucket and grant GitHub Actions access.
+Run this once to create the Terraform state bucket, enable required APIs, and grant GitHub Actions access.
 
 ```bash
 cd infra/bootstrap
@@ -8,7 +8,7 @@ terraform init
 terraform apply \
   -var project_id=YOUR_PROJECT_ID \
   -var region=europe-west2 \
-  -var tf_state_bucket=tf-state-data-platform \
+  -var tf_state_bucket=tfstate-data-platform-490117-2025 \
   -var github_actions_sa=github-actions@YOUR_PROJECT_ID.iam.gserviceaccount.com
 ```
 

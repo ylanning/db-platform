@@ -118,3 +118,14 @@ cd infra/bootstrap
 terraform init
 terraform apply   -var project_id=YOUR_PROJECT_ID   -var region=europe-west2   -var tf_state_bucket=tfstate-data-platform-490117-2025   -var github_actions_sa=github-actions@YOUR_PROJECT_ID.iam.gserviceaccount.com
 ```
+## Terraform state bootstrap
+Run the one-time bootstrap module to create the state bucket, enable required APIs, and grant CI access:
+```bash
+cd infra/bootstrap
+terraform init
+terraform apply \
+  -var project_id=YOUR_PROJECT_ID \
+  -var region=europe-west2 \
+  -var tf_state_bucket=tfstate-data-platform-490117-2025 \
+  -var github_actions_sa=github-actions@YOUR_PROJECT_ID.iam.gserviceaccount.com
+```

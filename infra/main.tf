@@ -55,14 +55,9 @@ resource "google_storage_bucket" "backups" {
   uniform_bucket_level_access = true
 }
 
-resource "google_storage_bucket" "tf_state" {
-  location                    = var.region
-  name                        = var.tf_state_bucket
-  uniform_bucket_level_access = true
-  versioning {
-    enabled = true
-  }
-}
+
+
+
 
 
 resource "google_service_account" "control_plane" {

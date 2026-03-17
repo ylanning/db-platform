@@ -73,8 +73,3 @@ variable "github_repo" {
   type        = string
   description = "GitHub repository in format 'owner/repo'"
 }
-
-variable "tf_state_bucket" {
-  type        = string
-  description = "GCS bucket for Terraform state"
-}

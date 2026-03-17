@@ -89,13 +89,14 @@ terraform apply \
 Selection guidance: use HA for user-facing critical services, read replicas for cost-conscious resilience with manual failover, and backups/PITR for disaster recovery and data correction.
 
 ## CI/CD secrets
-- `GCP_PROJECT_ID`
-- `WIF_PROVIDER`
-- `WIF_SERVICE_ACCOUNT`
-- `CLOUDSQL_INSTANCE_ID`
-- `BACKUP_BUCKET`
-- `TF_STATE_BUCKET`
-- `TF_STATE_PREFIX`
+- `GCP_PROJECT_ID`: GCP project id
+- `WIF_PROVIDER`: Workload Identity Provider resource name
+- `WIF_SERVICE_ACCOUNT`: GitHub Actions service account email
+- `CLOUDSQL_INSTANCE_ID`: Cloud SQL instance id
+- `BACKUP_BUCKET`: GCS bucket for backups
+- `TF_STATE_BUCKET`: GCS bucket for Terraform state
+- `TF_STATE_PREFIX`: State key prefix (e.g., `db-platform/dev`)
+- `TF_ENV` (optional): Selects env tfvars (default `dev`)
 
 ## Environments
 This repo supports multiple environments via tfvars files:
@@ -107,5 +108,13 @@ Copy the `.example` files and fill in your values.
 The CI pipeline uses `TF_ENV` (default `dev`) to select the tfvars file.
 
 For state reuse across environments, set:
-- `TF_STATE_BUCKET` (shared bucket, e.g., `tf-state-data-platform`)
+- `TF_STATE_BUCKET` (shared bucket, e.g., `tfstate-data-platform-490117-2025`)
 - `TF_STATE_PREFIX` (e.g., `db-platform/dev`, `db-platform/staging`, `db-platform/prod`)
+
+## Terraform state bootstrap
+Run the one-time bootstrap module to create the state bucket and grant CI access:
+```bash
+cd infra/bootstrap
+terraform init
+terraform apply   -var project_id=YOUR_PROJECT_ID   -var region=europe-west2   -var tf_state_bucket=tfstate-data-platform-490117-2025   -var github_actions_sa=github-actions@YOUR_PROJECT_ID.iam.gserviceaccount.com
+```

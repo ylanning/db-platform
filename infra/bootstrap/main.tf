@@ -130,3 +130,19 @@ resource "google_project_iam_member" "control_plane_storage_admin" {
   role    = "roles/storage.admin"
   member  = "serviceAccount:${var.control_plane_sa}"
 }
+
+resource "google_cloud_scheduler_job" "daily_backup" {
+  name        = "dbp-daily-backup"
+  description = "Trigger on-demand Cloud SQL backup via control plane"
+  schedule    = "0 6 * * *"
+  time_zone   = "Europe/London"
+
+  http_target {
+    http_method = "POST"
+    uri         = "${var.cloud_run_url}/backup"
+
+    oidc_token {
+      service_account_email = var.scheduler_sa
+    }
+  }
+}

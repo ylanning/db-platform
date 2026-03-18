@@ -22,3 +22,13 @@ variable "control_plane_sa" {
   type        = string
   description = "Control plane service account email"
 }
+
+variable "scheduler_sa" {
+  type        = string
+  description = "Scheduler service account email"
+}
+
+variable "cloud_run_url" {
+  type        = string
+  description = "Full Cloud Run URL (e.g., https://...run.app)"
+}

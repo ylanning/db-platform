@@ -117,22 +117,6 @@ resource "google_service_account" "scheduler" {
   display_name = "DBP Backup Scheduler"
 }
 
-resource "google_cloud_scheduler_job" "daily_backup" {
-  name        = "dbp-daily-backup"
-  description = "Trigger on-demand Cloud SQL backup via control plane"
-  schedule    = "0 6 * * *"
-  time_zone   = "Europe/London"
-
-  http_target {
-    http_method = "POST"
-    uri         = "${var.cloud_run_url}/backup"
-
-    oidc_token {
-      service_account_email = google_service_account.scheduler.email
-    }
-  }
-}
-
 # -----------------------------------------------------------------------------
 # GitHub Actions - Workload Identity Federation
 # -----------------------------------------------------------------------------

@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter
 
 from app.models.schemas import (
@@ -11,6 +13,9 @@ from app.models.schemas import (
 )
 from app.services.backups import BackupService
 from app.services.provisioner import ProvisionerService
+from app.utils.logging import log_request_info
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -27,12 +32,16 @@ async def health_check():
 
 @router.post("/provision", response_model=ProvisionResponse)
 async def provision(req: ProvisionRequest) -> ProvisionResponse:
-    return await ProvisionerService().provision(req)
+    with log_request_info(db_id=req.db_id, operation="provision", owner=req.owner):
+        logger.info("Provisioning endpoint called")
+        return await ProvisionerService().provision(req)
 
 
 @router.post("/deprovision", response_model=ProvisionResponse)
 async def deprovision(req: ProvisionRequest) -> ProvisionResponse:
-    return await ProvisionerService().deprovision(req)
+    with log_request_info(db_id=req.db_id, owner=req.owner):
+        logger.info(f"Deprovisioning {req.db_id} for {req.owner}")
+        return await ProvisionerService().deprovision(req)
 
 
 @router.get("/status/{db_id}", response_model=StatusResponse)

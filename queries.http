@@ -1,0 +1,59 @@
+#@host=http://localhost:8080
+
+## DEV
+@host=https://dbp-control-plane-926377652927.europe-west2.run.app
+# GCP TOKEN
+@GCP_auth_token = token_string_here
+
+GET {{host}}/
+Authorization: Bearer {{GCP_auth_token}}
+
+###
+
+GET {{host}}/health
+Authorization: Bearer {{GCP_auth_token}}
+
+###
+
+POST {{host}}/provision
+Authorization: Bearer {{GCP_auth_token}}
+
+{
+    "db_id": "test_db",
+    "owner": "dev_team"
+}
+
+###
+
+POST {{host}}/deprovision
+Authorization: Bearer {{GCP_auth_token}}
+
+{
+    "db_id": "test_db",
+    "owner": "dev_team"
+}
+
+###
+
+POST {{host}}/status/{db_id}
+Authorization: Bearer {{GCP_auth_token}}
+
+###
+
+POST {{host}}/backup
+Authorization: Bearer {{GCP_auth_token}}
+
+{
+    "db_id": "test_db"
+}
+
+###
+
+POST {{host}}/rotate-credentials
+Authorization: Bearer {{GCP_auth_token}}
+
+{
+    "db_id": "test_db"
+}
+
+###

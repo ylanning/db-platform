@@ -22,7 +22,20 @@ Set environment variables (prefix `DBP_`):
 ## Local run
 ```bash
 poetry install
-poetry run uvicorn app.main:app --reload
+poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8080
+```
+
+## Logging
+Logging is JSON-formatted and includes request context when available.
+
+Example request with a custom request id:
+```bash
+curl -H "x-request-id: demo-123" http://localhost:8080/health
+```
+
+Example log output:
+```json
+{"timestamp":"2026-03-15T14:30:22Z","level":"info","event":"request_started","request_id":"demo-123","method":"GET","path":"/health"}
 ```
 
 ## Terraform
@@ -112,13 +125,6 @@ For state reuse across environments, set:
 - `TF_STATE_PREFIX` (e.g., `db-platform/dev`, `db-platform/staging`, `db-platform/prod`)
 
 ## Terraform state bootstrap
-Run the one-time bootstrap module to create the state bucket and grant CI access:
-```bash
-cd infra/bootstrap
-terraform init
-terraform apply   -var project_id=YOUR_PROJECT_ID   -var region=europe-west2   -var tf_state_bucket=tfstate-data-platform-490117-2025   -var github_actions_sa=github-actions@YOUR_PROJECT_ID.iam.gserviceaccount.com
-```
-## Terraform state bootstrap
 Run the one-time bootstrap module to create the state bucket, enable required APIs, and grant CI access:
 ```bash
 cd infra/bootstrap
@@ -127,5 +133,8 @@ terraform apply \
   -var project_id=YOUR_PROJECT_ID \
   -var region=europe-west2 \
   -var tf_state_bucket=tfstate-data-platform-490117-2025 \
-  -var github_actions_sa=github-actions@YOUR_PROJECT_ID.iam.gserviceaccount.com
+  -var github_actions_sa=github-actions@YOUR_PROJECT_ID.iam.gserviceaccount.com \
+  -var control_plane_sa=dbp-control-plane@YOUR_PROJECT_ID.iam.gserviceaccount.com \
+  -var scheduler_sa=dbp-backup-scheduler@YOUR_PROJECT_ID.iam.gserviceaccount.com \
+  -var cloud_run_url=https://dbp-control-plane-PROJECT_NUMBER.europe-west2.run.app
 ```

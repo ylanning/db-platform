@@ -13,6 +13,7 @@ from app.services.errors import UpstreamError
 from app.services.secrets import SecretManagerService
 from app.services.sqladmin import CloudPostgresqlAdminClient
 from app.utils.async_utils import run_with_timeout
+from app.utils.logging import log_request_info
 
 logger = logging.getLogger(__name__)
 
@@ -29,31 +30,32 @@ class ProvisionerService:
 
     async def provision(self, req: ProvisionRequest) -> ProvisionResponse:
         """Create database, user, and store connection string in Secret Manager."""
-        logger.info(f"Provisioning {req.db_id}")
         sql = CloudPostgresqlAdminClient()
         secrets = SecretManagerService()
         db_name = req.db_id
         user_name = f"user_{req.db_id}"
 
         password = secrets.generate_password()
-        try:
-            await run_with_timeout(sql.create_database, db_name)
-            await run_with_timeout(sql.create_user, user_name, password)
-        except Exception as exc:
-            if sql.is_upstream_error(exc):
-                logger.error(f"Error provisioning {req.db_id}", exc_info=exc)
-                raise UpstreamError(f"Failed to provision database: {exc}") from exc
-            raise
+        with log_request_info(db_name=db_name, user_name=user_name, operation="provision"):
+            logger.info(f"Provisioning {db_name} Owner: {user_name} start processing")
+            try:
+                await run_with_timeout(sql.create_database, db_name)
+                await run_with_timeout(sql.create_user, user_name, password)
+            except Exception as exc:
+                if sql.is_upstream_error(exc):
+                    logger.error(f"Error provisioning {req.db_id}", exc_info=exc)
+                    raise UpstreamError(f"Failed to provision database: {exc}") from exc
+                raise
 
-        conn_string = f"postgresql://{user_name}:{password}@/{db_name}"
-        secret_name = await run_with_timeout(
-            secrets.create_or_update_secret, req.db_id, conn_string
-        )
+            conn_string = f"postgresql://{user_name}:{password}@/{db_name}"
+            secret_name = await run_with_timeout(
+                secrets.create_or_update_secret, req.db_id, conn_string
+            )
 
-        logger.info(f"Provisioned {req.db_id} Owner: {req.owner} ")
-        return ProvisionResponse(
-            db_id=req.db_id, status="provisioned", connection_secret_name=secret_name
-        )
+            logger.info("Provisioning completed")
+            return ProvisionResponse(
+                db_id=req.db_id, status="provisioned", connection_secret_name=secret_name
+            )
 
     async def deprovision(self, req: ProvisionRequest) -> ProvisionResponse:
         """Delete database, user, and secret. Ignores resources not found."""

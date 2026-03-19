@@ -39,23 +39,29 @@ async def provision(req: ProvisionRequest) -> ProvisionResponse:
 
 @router.post("/deprovision", response_model=ProvisionResponse)
 async def deprovision(req: ProvisionRequest) -> ProvisionResponse:
-    with log_request_info(db_id=req.db_id, owner=req.owner):
+    with log_request_info(db_id=req.db_id, owner=req.owner, operation="deprovision"):
         logger.info(f"Deprovisioning {req.db_id} for {req.owner}")
         return await ProvisionerService().deprovision(req)
 
 
 @router.get("/status/{db_id}", response_model=StatusResponse)
 async def status(db_id: str) -> StatusResponse:
-    return await ProvisionerService().status(db_id)
+    with log_request_info(db_id=db_id, operation="status"):
+        logger.info(f"Getting status for {db_id}")
+        return await ProvisionerService().status(db_id)
 
 
 @router.post("/backup", response_model=BackupResponse)
 async def backup(req: BackupRequest) -> BackupResponse:
-    return await BackupService().backup(req)
+    with log_request_info(db_id=req.db_id, operation="backup"):
+        logger.info(f"Backing up {req.db_id} for {req.owner}")
+        return await BackupService().backup(req)
 
 
 @router.post("/rotate-credentials", response_model=RotateCredentialsResponse)
 async def rotate_credentials(
     req: RotateCredentialsRequest,
 ) -> RotateCredentialsResponse:
-    return await ProvisionerService().rotate_credentials(req)
+    with log_request_info(db_id=req.db_id, operation="rotate-credentials"):
+        logger.info(f"Rotating credentials for {req.db_id}")
+        return await ProvisionerService().rotate_credentials(req)

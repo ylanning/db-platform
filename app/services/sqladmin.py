@@ -69,24 +69,18 @@ class CloudPostgresqlAdminClient:
 
     def create_backup(self, db_name: str) -> str:
         """Create an on-demand backup. Returns the backup ID."""
-        request = (
-            self._service.instances()
-            .backuprun()
-            .insert(
-                project=self.project_id,
-                instance=self.instance_id,
-                body={"description": f"Backup for {db_name}"},
-            )
+        request = self._service.backupRuns().insert(
+            project=self.project_id,
+            instance=self.instance_id,
+            body={"description": f"Backup for {db_name}"},
         )
         response = request.execute()
         return str(response.get("id", ""))
 
     def get_backup_status(self, backup_id: str) -> str:
         """Get the status of a backup operation."""
-        request = (
-            self._service.instances()
-            .backuprun()
-            .get(project=self.project_id, instance=self.instance_id, id=backup_id)
+        request = self._service.backupRuns().get(
+            project=self.project_id, instance=self.instance_id, id=backup_id
         )
         response = request.execute()
         return response.get("status", "")

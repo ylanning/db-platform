@@ -3,7 +3,7 @@
 ## DEV
 @host=https://dbp-control-plane-926377652927.europe-west2.run.app
 # GCP TOKEN
-@GCP_auth_token = token_string_here
+@GCP_auth_token = eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0MWYxNDFhYTE5ZGYwYWM5N2RhYTU1ZTYwMDc2NmM0YzUzNjRjNDIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIzMjU1NTk0MDU1OS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjMyNTU1OTQwNTU5LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTEwNDUxODAyNTY5NTc5MzU5MTgzIiwiZW1haWwiOiJ5YW50aS5sYW5uaW5nQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJhdF9oYXNoIjoiTVBxa1RKdDFETGpIWmhkVkY4VDZVZyIsImlhdCI6MTc3MzkxODUxNywiZXhwIjoxNzczOTIyMTE3fQ.JPGcmlpX80ykrK35fXz-dtr0fmI9Ut6SxL2oSSlvQFqXI_VXO62KIS3OJUUls0CVKzOlQgwXGTH202fwt--urBc6Ho8gMF_RbPwhaWgTd-hKhc0MKI6ZXTbKYaledqSq4YGciVihP67-jNVi_S4lt7v0eROwynHtvWS8frVb6E4lF3jWlLMY6icOUIlcE3HWQoerFbj4Ah-s9iWIcDAPa2l7x1WQY6q9JPVAoh4OeqGK2PGueZgqmJnMqGN_RT4LDb2TDFzZ9HtdGlszGGPiHf-0blWquwGbHbEv_IxNlBIP7voQDWE65laapPBOsGsPWGTu8s3PImMMRhP_JV4f5Q
 
 GET {{host}}/
 Authorization: Bearer {{GCP_auth_token}}
@@ -35,7 +35,7 @@ Authorization: Bearer {{GCP_auth_token}}
 
 ###
 
-POST {{host}}/status/{db_id}
+GET {{host}}/status/test_db
 Authorization: Bearer {{GCP_auth_token}}
 
 ###

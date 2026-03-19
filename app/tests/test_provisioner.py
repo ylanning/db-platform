@@ -107,7 +107,7 @@ async def test_provision_creates_db_and_user(fake_sql, fake_secrets, patch_servi
     svc = ProvisionerService()
     req = ProvisionRequest(db_id="mydb", owner="team-backend")
 
-    resp = await svc.provision(req)
+    resp = await svc.run_provision(req)
 
     assert resp.db_id == "mydb"
     assert resp.status == "provisioned"
@@ -128,7 +128,7 @@ async def test_provision_upstream_error(fake_sql, fake_secrets, patch_services, 
     req = ProvisionRequest(db_id="mydb", owner="team-backend")
 
     with pytest.raises(UpstreamError, match="Failed to provision database"):
-        await svc.provision(req)
+        await svc.run_provision(req)
 
 
 @pytest.mark.asyncio
@@ -141,7 +141,7 @@ async def test_deprovision_deletes_resources(fake_sql, fake_secrets, patch_servi
     svc = ProvisionerService()
     req = ProvisionRequest(db_id="mydb", owner="team-backend")
 
-    resp = await svc.deprovision(req)
+    resp = await svc.run_deprovision(req)
 
     assert resp.status == "deprovisioned"
     assert resp.connection_secret_name is None
@@ -160,7 +160,7 @@ async def test_deprovision_continues_on_secret_error(
     svc = ProvisionerService()
     req = ProvisionRequest(db_id="mydb", owner="team-backend")
 
-    resp = await svc.deprovision(req)
+    resp = await svc.run_deprovision(req)
 
     assert resp.status == "deprovisioned"
 
@@ -170,7 +170,7 @@ async def test_status_returns_db_status(patch_services):
     """Verify status returns current database provisioning state."""
     svc = ProvisionerService()
 
-    resp = await svc.status("mydb")
+    resp = await svc.run_status("mydb")
 
     assert resp.db_id == "mydb"
     assert resp.status == "provisioned"
@@ -186,7 +186,7 @@ async def test_rotate_credentials_updates_password(
     svc = ProvisionerService()
     req = RotateCredentialsRequest(db_id="mydb")
 
-    resp = await svc.rotate_credentials(req)
+    resp = await svc.run_rotate_credentials(req)
 
     assert resp.status == "rotated"
     assert resp.secret_name == "projects/test/secrets/dbp_mydb_conn"
@@ -206,4 +206,4 @@ async def test_rotate_credentials_upstream_error(
     req = RotateCredentialsRequest(db_id="mydb")
 
     with pytest.raises(UpstreamError, match="Failed to rotate credentials"):
-        await svc.rotate_credentials(req)
+        await svc.run_rotate_credentials(req)

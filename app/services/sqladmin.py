@@ -1,9 +1,13 @@
 """Client for managing databases and users in Cloud SQL PostgreSQL."""
 
+import httplib2
+import structlog
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from app.utils.config import get_settings
+
+logger = structlog.get_logger()
 
 
 class CloudPostgresqlAdminClient:
@@ -23,7 +27,9 @@ class CloudPostgresqlAdminClient:
             raise RuntimeError("Missing project_id or instance_id in database settings")
         self.project_id = settings.project_id
         self.instance_id = settings.instance_id
-        self._service = build("sqladmin", "v1", cache_discovery=False)
+        # httplib2 only supports timeouts at the HTTP client level, not per request.
+        http = httplib2.Http(timeout=settings.request_timeout)
+        self._service = build("sqladmin", "v1", http=http, cache_discovery=False)
 
     def create_database(self, db_name: str) -> None:
         """Create a new database in the Cloud SQL instance."""
@@ -69,13 +75,27 @@ class CloudPostgresqlAdminClient:
 
     def create_backup(self, db_name: str) -> str:
         """Create an on-demand backup. Returns the backup ID."""
+        logger.info(
+            "backup_create_request",
+            project_id=self.project_id,
+            instance_id=self.instance_id,
+            db_name=db_name,
+        )
         request = self._service.backupRuns().insert(
             project=self.project_id,
             instance=self.instance_id,
             body={"description": f"Backup for {db_name}"},
         )
         response = request.execute()
-        return str(response.get("id", ""))
+        backup_id = str(response.get("id", ""))
+        logger.info(
+            "backup_create_response",
+            project_id=self.project_id,
+            instance_id=self.instance_id,
+            db_name=db_name,
+            backup_id=backup_id,
+        )
+        return backup_id
 
     def get_backup_status(self, backup_id: str) -> str:
         """Get the status of a backup operation."""

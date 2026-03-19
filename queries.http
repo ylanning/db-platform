@@ -19,7 +19,7 @@ POST {{host}}/provision
 Authorization: Bearer {{GCP_auth_token}}
 
 {
-    "db_id": "test_db",
+    "db_id": "test_db_01",
     "owner": "dev_team"
 }
 
